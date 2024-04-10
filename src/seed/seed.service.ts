@@ -17,7 +17,7 @@ export class SeedService {
   async executeSeed() {
    await this.pokemonModel.deleteMany({})
     const data = await this.axiosAdapter.get<PokeResponse>(
-      `https://pokeapi.co/api/v2/pokemon?limit=360`,
+      `https://pokeapi.co/api/v2/pokemon?limit=100`,
     );
     const arrayPromise=[] 
     data.results.forEach(({ name, url }) => {
