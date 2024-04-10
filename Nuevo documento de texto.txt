@@ -1,0 +1,162 @@
+
+Componentes DENTRO del circulo de Docker:
+
+Docker daemon: Es el centro de docker, el corazón que gracias a el, podemos comunicarnos con los servicios de docker.
+REST API: Como cualquier otra API, es la que nos permite visualizar docker de forma "gráfica".
+Cliente de docker: Gracias a este componente, podemos comunicarnos con el corazón de docker (Docker Daemon) que por defecto es la línea de comandos.
+Dentro de la arquitectura de Docker encontramos:
+
+Contenedores: Es la razón de ser de Docker, es donde podemos encapsular nuestras imagenes para llevarlas a otra computadora, o servidor, etc.
+Imagenes: Son las encapsulaciones de x contenedor. Podemos correr nuestra aplicación en Java por medio de una imagen, podemos utilizar Ubuntu para correr nuestro proyecto, etc.
+Volumenes de datos: Podemos acceder con seguridad al sistema de archivos de nuestra máquina.
+Redes: Son las que permiten la comunicación entre contenedores.
+
+
+Que es un contenedor ?
+
+Es una agrupación de procesos.
+
+Es una entidad lógica, no tiene el limite estricto de las máquinas virtuales, emulación del sistema operativo simulado por otra más abajo.
+
+Ejecuta sus procesos de forma nativa.
+
+Los procesos que se ejecutan adentro de los contenedores ven su universo como el contenedor lo define, no pueden ver mas allá del contenedor, a pesar de estar corriendo en una maquina más grande.
+
+No tienen forma de consumir más recursos que los que se les permite. Si esta restringido en memoria ram por ejemplo, es la única que pueden usar.
+
+A fines prácticos los podemos imaginar cómo maquinas virtuales, pero NO lo son. Máquinas virtuales livianas.
+
+Docker corre de forma nativa solo en Linux.
+
+Sector del disco: Cuando un contenedor es ejecutado, el daemon de docker le dice, a partir de acá para arriba este disco es tuyo, pero no puedes subir mas arriba.
+
+Docker hace que los procesos adentro de un contenedor este aislados del resto del sistema, no le permite ver más allá.
+
+Cada contenedor tiene un ID único, también tiene un nombre.
+
+Mis Notas del video:
+
+Cada vez que un contendor se ejecuta, en realidad lo que ejecuta es un proceso del sistema operativo. Este proceso se le conoce como Main process.
+
+Main process Determina la vida del contenedor, un contendor corre siempre y cuando su proceso principal este corriendo.
+
+Sub process Un contenedor puede tener o lanzar procesos alternos al main process, si estos fallan el contenedor va a seguir encedido a menos que falle el main.
+
+Ejemplos manejados en el video
+
+Batch como Main process
+Agujero negro (/dev/null) como Main process
+
+docker run --name alwaysup -d ubuntu tail -f /dev/null 
+_el ouput que te regresa es el ID del contentedor _
+
+Te puedes conectar al contenedor y hacer cosas dentro del él con el siguiente comando (sub proceso)
+
+
+docker exec -it alwaysup bash
+Se puede matar un Main process desde afuera del contenedor, esto se logra conociendo el id del proceso principal del contenedor que se tiene en la maquina. Para saberlo se ejecuta los siguientes comandos;
+
+
+docker inspect --format '{{.State.Pid}}' alwaysup
+_El output del comando es el process ID (2474) _
+
+Para matar el proceso principal del contenedor desde afuera se ejecuta el siguiente comando (solo funciona en linux)
+
+
+docker-run hello-world   -- corremos el contenedor hello-world
+
+docker ps                                            --ver los contenedores que hay corriendo
+docker ps -a                                          -- ver todos los contenedores que han corrido 
+docker rename  pepe  hello-platzi                       -- le cmabio el nombre al contenedor pepe por hello-platzi
+run --name hello-dani hello-world                      ---- correr un contenedor con la imagen hello-world y nombrarlo hello-dani
+docker rm hello-dani                                      --- borra el contenedor con nombre hello-dani
+docker rm -f hello-dani  				----- borra el contenedor con nombre hello-dani aunque este corriendo
+docker container prune                                --borra todos los contenedores que no estan corriendo
+docker run -it ubuntu                                -- nos conectamos  la shell de la imagen ubuntu   -it modo interactivo
+docker run --name contDetach -d ubuntu tail -f /dev/null                     --le ponemos un nombre contDetach y corremos el contenedor en modo detach -d es lo mismo  que --detach
+docker exec -it nombre_contenedor bash                           -- nos permite en un contenedor que ya exite y que esta corriendo ejecutar un comando o un proceso en este caso un bash
+docker inspect --format '{{.State.Pid}}' contDetach       -- me devuelve el id del proceso corriendo en mi contenedor
+docker inspect db                                       --- me devuelve los datos de configuracion de la imagen db
+kill 5553   ----- cierro el proceso d3elc contenedor  docker kill nombre imagen
+docker stop nombre_contenedor                                  -- parar un contenedor
+docker run --name proxy -p 8080:80 -d nginx                   //-p 8080:80  puerto en que lo voya exponer en mi maquina 80 puerto expuesto en docker
+docker logs nombre_contenedor                                ver los log del contenedor cuando esta corriendo em modo -d
+docker logs -f nombre_cont                                   ver los log del contenedor cuando esta corriendo en modo -d en directo, y si hago exit no se cierra el proceso principal solo el log
+docker logs --tail 10 -f nombre_cont  
+docker run --name db -d -v ${pwd}:/data/db mongo       hacer un bind  ${pwd} .. ruta donde queremos guradar las cosas en nuestra maquina :/data.... lo que queremos guardar del contenedor
+
+volumenes
+docker volume ls                              - ver los volumenes que tiene docker
+docker volume create dbdata                   --- creamos el volumen dbdata
+docker run -d --name  db --mount src=dbdata,dst= /data/db mongo              --mount para montar un volumen a un contendor src=nombre del volumen dst carpeta del contenedor donde se generan 										los datos que queremos guardar en el volumen
+
+Host: Donde Docker esta instalado. Bind Mount: Guarda los archivos en la maquina local persistiendo y visualizando estos datos (No seguro). 
+Volume: Guarda los archivos en el area de Docker donde Docker los administra (Seguro). 
+TMPFS Mount: Guarda los archivos temporalmente y persiste los datos en la memoria del contenedor, cuando muera sus datos mueren con el contenedor.
+
+docker cp  prueba.txt copytest:/testing/test.txt                                 -- cp para copiar un archivo en este caso prueba.txt al contenedor copytest en el directorio testing/ 										nombrando el 	chivo como test.txt
+docker cp copytest:/testing localTesting                                copiamos un diretcorio desde un contenedor hasta un directorio local
+
+--------------imagenes-----
+docker image ls
+
+dockerfile    ----es un archivo que describe lo que yp quiero que pase cuando se crea un imagen y con un comando que se llama build el resultado de hacer eso va a ser una imagen
+esto dentro de docker file
+FROM ubuntu:latest   # desde donde partimos
+
+run touch /usr/src/hola-platzi.txt   #vamos a correr un comando
+
+esto fuera ya del docker file  d¡en el cmd
+docker build -t ubuntu:platzi . // me creo la imagen de ubuntu que fue sobre la que se creo y  con la version platzi ya agregando otras cosas . porque es el directorio donde estamos ahora 				como contexto de build, y asi coge el dockerfile que tenemos
+docker run -it ubuntu:platzi    ----- me corro un contenedor a partir de la imagen creada
+docker tag ubuntu:platzi ldayala/ubuntu:platzi    renombrar la imagen para subirla a mi docker hub
+ docker push ldayala/ubuntu:platzi                   ---- subirme la imagen a docker hub  
+
+ mkdir imagenes (creo un directorio en mi máquina) $ cd imagenes (entro al directorio) $ touch Dockerfile (creo un Dockerfile) $ code . (abro code en el direcotrio en el que estoy)
+
+##Contenido del Dockerfile## FROM ubuntu:latest RUN touch /ust/src/hola-platzi.txt (comando a ejecutar en tiempo de build) ##fin##
+
+$ docker build -t ubuntu:platzi . (creo una imagen con el contexto de build <directorio>) 
+$ docker run -it ubuntu:platzi (corro el contenedor con la nueva imagen) 
+$ docker login (me logueo en docker hub) 
+$ docker tag ubuntu:platzi miusuario/ubuntu:platzy (cambio el tag para poder subirla a mi docker hub) 
+$ docker push miusuario/ubuntu:platzi (publico la imagen a mi docker hub)
+
+ docker run --rm -p 3000:3000 platziapp   me creo un contenedor con la imagen que me cree
+
+docker run --name dani --rm -p 3000:3000 -v C:\Docker\docker\index.js:/usr/src/index.js app
+
+
+
+----network ----
+
+docker network ls    --- lista todas las redes
+NETWORK ID     NAME      DRIVER    SCOPE
+3041932d5951   bridge    bridge    local     ---- no es importante
+da2f85a7cadb   host      host      local     ----- es una representacion en docker de la red real de mi maquina,si le permite al contenedor usar esta red tendra acceso a toda la red del pc
+8715e9929ff8   none      null      local    ---- una red especial de docker que lo podemos usar si queremos que el contenedor no tenga acceso a niguna red
+
+docker network create --attachable daninet    --- creo la red daninet  --attachable para que otros contenedores se puedan conectar a ella cuando quieras
+docker network inspect daninet                .--- inspeccionar las red daninet
+docker network connect daninet db              --- conecto a  la red daninet el contendor db
+cuando dos contenedores estan dentro d ela misma red se encuentra con el nombre
+docker run -d --name appContaniner -p 3000:3000 --env MONGO_URL=mongodb://db:27017/test  app  --env para asignarle una variable de entorno
+
+docker compose
+docker-compose up
+docker-compose down  ---cierra y elimina todos los contenedores levantados con docker compose
+docker-compose logs  ---ver los logs de todos los servicios
+docker-compose logs app   -- ver los log del servicio que contien en el nombre app
+docker-compose logs -f app  --- -f para ver los log a medida que se van generando
+docker-compose exec app bash  --- correr un shel en un contenedor
+docker-compose build  --crea las imagenes
+docker-compose -f docker-compose.prod.yaml --env-file .env.pro up --build //-f para decirle que vamos a utilizar el 										archivo docker-compose.prod.yaml
+
+Es necesario reiniciar los servicios porque la dependencia del aplicativo redtrust requiere la session iniciada para poder logar en el y utilizar los certificados, y cada cierto tiempo debe ser reiniciado porque si no falla y no ce cierran colas, ademas de que también los servicios de nuestro aplicativo requieren servicios programados.
+
+
+docker-compose.override.yml:  es un archivo que se encarga de sobreescribir tu configuración de docker-compose.yml , se puede usar para tener segura tu configuración y para no guardar los cambios en el repositorio de git. Un equivalente podría ser los archivos de declaración de variables de entorno, donde hay un archivo .env declarando su nombre y valor, y hay una copia .env.example con solo las variables sin valor. En .gitignore se declara que los cambios en .env no serán guardados, pero mandamos el archivo de ejemplo al repositorio.
+
+docker rm -f $(docker ps -aq)     --- con esto borramos todos los contenedores, $() => dentro de esto lo que pasamos es un comnado y que nos devuelve los ide de los contenedores que tenemos
+
+docker system prune   _ me borra todos los contenedores , imagenes , volumenes y networks que tenemos en la pc
