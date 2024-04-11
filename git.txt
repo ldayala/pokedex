@@ -1,0 +1,120 @@
+git remote add origin https://github.com/ldayala/pokedex.git
+git branch -M main     renombrar la rama a main
+git push -u origin main
+
+There is no tracking information for the current branch.
+Please specify which branch you want to merge with.
+See git-pull(1) for details.
+
+    git pull <remote> <branch>
+
+If you wish to set tracking information for this branch you can do so with:
+
+    git branch --set-upstream-to=origin/<branch> main
+ChatGPT
+El mensaje que estás viendo indica que la rama local main no tiene una configuración de seguimiento asociada con una rama remota. Esto significa que Git no sabe automáticamente a qué rama remota debe hacer referencia al realizar operaciones como git pull o git push.
+
+Para solucionar esto, sigue estos pasos para establecer la configuración de seguimiento de la rama main con la rama remota correspondiente (por ejemplo, origin/main):
+
+1. Establecer el seguimiento de la rama remota:
+Utiliza el siguiente comando para configurar la rama main para hacer seguimiento de origin/main:
+
+bash
+Copy code
+git branch --set-upstream-to=origin/main main
+Este comando establece la rama main local para hacer seguimiento de la rama origin/main en el repositorio remoto origin.
+
+2. Realizar git pull:
+Una vez que hayas configurado correctamente el seguimiento de la rama, puedes intentar hacer git pull para fusionar los cambios de la rama remota en tu rama local:
+
+bash
+Copy code
+git pull origin main
+Esto traerá los cambios de la rama main remota a tu rama main local.
+
+3. Realizar git push (si es necesario):
+Si necesitas empujar tus cambios locales en la rama main al repositorio remoto, puedes usar:
+
+bash
+Copy code
+git push origin main
+Esto enviará tus cambios locales en la rama main al repositorio remoto origin.
+
+Notas adicionales:
+Asegúrate de reemplazar origin con el nombre correcto de tu repositorio remoto si no estás utilizando el nombre predeterminado origin.
+Si necesitas hacer seguimiento de una rama diferente en lugar de origin/main, ajusta el comando git branch --set-upstream-to=origin/main main según sea necesario.
+Después de realizar estos pasos, la rama main debería tener una configuración de seguimiento adecuada y podrás realizar operaciones como git pull y git push de manera más conveniente sin especificar explícitamente la rama remota cada vez.
+
+----------------------------------------
+PS D:\NESTJS- MICROSERVICES\nest\pokedex> git pull origin main
+From https://github.com/ldayala/pokedex
+ * branch            main       -> FETCH_HEAD
+error: The following untracked working tree files would be overwritten by merge:
+        .eslintrc.js
+        .gitignore
+        .prettierrc
+        README.md
+        nest-cli.json
+        package-lock.json
+        package.json
+        public/index.html
+        public/style.css
+        src/app.module.ts
+        src/main.ts
+        src/pokemon/dto/create-pokemon.dto.ts
+        src/pokemon/dto/update-pokemon.dto.ts
+        src/pokemon/entities/pokemon.entity.ts
+        src/pokemon/pokemon.controller.ts
+        src/pokemon/pokemon.module.ts
+        src/pokemon/pokemon.service.ts
+        test/app.e2e-spec.ts
+        test/jest-e2e.json
+        tsconfig.build.json
+        tsconfig.json
+Please move or remove them before you merge.
+Aborting
+ChatGPT
+El error que estás viendo indica que Git no puede completar la operación git pull porque hay archivos no rastreados en tu directorio de trabajo local que serían sobrescritos por la fusión desde la rama remota main.
+
+Para resolver este problema, necesitas tomar medidas para evitar que estos archivos no rastreados sean sobrescritos. Aquí hay algunos pasos que puedes seguir:
+
+1. Guardar los cambios locales:
+Si has realizado cambios en alguno de los archivos listados como no rastreados y deseas conservar esos cambios, primero guarda estos cambios utilizando git add y git commit:
+
+bash
+Copy code
+git add .
+git commit -m "Guardar cambios locales antes de fusionar"
+2. Descartar los cambios no deseados:
+Si no necesitas conservar los cambios en los archivos no rastreados y estás dispuesto a sobrescribirlos con la versión de la rama remota main, puedes eliminar estos archivos localmente. Ten en cuenta que esto eliminará permanentemente los cambios no guardados en estos archivos:
+
+bash
+Copy code
+git clean -f
+Nota: Ten mucho cuidado al usar git clean -f, ya que eliminará los archivos no rastreados de forma irreversible.
+
+3. Realizar la fusión nuevamente:
+Una vez que hayas manejado los archivos no rastreados, intenta realizar la fusión nuevamente usando git pull origin main:
+
+bash
+Copy code
+git pull origin main
+Esto debería completar la fusión desde la rama remota main en tu rama local main sin encontrar conflictos con archivos no rastreados.
+
+4. Alternativa: Descartar todos los cambios locales:
+Si prefieres descartar todos los cambios locales, incluidos los rastreados y no rastreados, puedes restablecer tu rama local main a la última versión remota utilizando:
+
+bash
+Copy code
+git fetch origin
+git reset --hard origin/main
+Este comando restablecerá tu rama local main a la misma versión que la rama remota main sin conservar ningún cambio local.
+
+Después de tomar una de estas acciones, deberías poder realizar la fusión de la rama remota main en tu rama local main sin encontrar el error de archivos no rastreados que se sobrescribirían. Asegúrate de elegir la opción que mejor se adapte a tus necesidades según si deseas conservar o descartar los cambios locales.
+
+
+
+
+
+
+
